@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account</title>
+  </head>
+
+  <body>
+    <h1>Create Your Account</h1>
+
+    <p>Register your account by providing the information below.</p>
+
+    <form action="#" method="post">
+      <fieldset>
+        <legend>Personal Information</legend>
+
+        <p>
+          <label for="fullName">Full Name:</label>
+          <input
+            type="text"
+            id="fullName"
+            name="fullName"
+            placeholder="Enter your full name"
+            required
+          />
+        </p>
+
+        <p>
+          <label for="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Choose a username"
+            minlength="3"
+            maxlength="30"
+            pattern="[A-Za-z0-9_]+"
+            title="Username can contain letters, numbers, and underscores only."
+            required
+          />
+        </p>
+
+        <p>
+          <label for="email">Email Address:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="you@example.com"
+            required
+          />
+        </p>
+
+        <p>
+          <label for="phone">Phone Number:</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="Enter 10-digit number"
+            pattern="[0-9]{10}"
+            title="Please enter a valid 10-digit phone number."
+            required
+          />
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Account Information</legend>
+
+        <p>
+          <label for="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Create a strong password"
+            minlength="6"
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{6,}"
+            title="Password must contain at least 6 characters, including an uppercase letter, lowercase letter, number, and special symbol."
+            required
+          />
+        </p>
+
+        <p>
+          Password must contain at least 6 characters, including uppercase,
+          lowercase, number, and special symbol.
+        </p>
+
+        <p>
+          <label for="confirmPassword">Confirm Password:</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="Re-enter your password"
+            minlength="6"
+            required
+          />
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Additional Information</legend>
+
+        <p>
+          <label for="dob">Date of Birth:</label>
+          <input type="date" id="dob" name="dob" />
+        </p>
+
+        <p>
+          <label for="country">Country:</label>
+          <select id="country" name="country" required>
+            <option value="">Select your country</option>
+            <option value="india">India</option>
+            <option value="usa">United States</option>
+            <option value="uk">United Kingdom</option>
+            <option value="canada">Canada</option>
+            <option value="other">Other</option>
+          </select>
+        </p>
+
+        <p>
+          <input type="checkbox" id="terms" name="terms" required />
+          <label for="terms"> I agree to the Terms and Conditions. </label>
+        </p>
+      </fieldset>
+
+      <p>
+        <button type="submit">Create Account</button>
+        <button type="reset">Clear</button>
+      </p>
+    </form>
+  </body>
+</html>
