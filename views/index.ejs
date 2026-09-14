@@ -33,10 +33,30 @@
             margin: 0 auto;
         }
 
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 35px;
+        }
+
         h1 {
             font-size: 42px;
             font-weight: 700;
-            margin-bottom: 35px;
+        }
+
+        .logout-button {
+            padding: 10px 18px;
+            border: 1px solid #cccccc;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #333333;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background: #f5f5f5;
         }
 
         .todo-form {
@@ -130,9 +150,24 @@
             padding: 8px 0;
         }
 
+        .flash-message {
+            margin-bottom: 20px;
+            padding: 12px 14px;
+            border-radius: 7px;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
         @media (max-width: 700px) {
             body {
                 padding: 30px 18px;
+            }
+
+            .header {
+                align-items: flex-start;
+                gap: 15px;
             }
 
             h1 {
@@ -155,13 +190,59 @@
 </head>
 
 <body>
+
     <div class="container">
 
-        <h1>My Todo-list</h1>
+        <!-- Header -->
 
-        <form action="/todos" method="POST" class="todo-form" id="todoForm">
+        <div class="header">
 
-            <!-- CSRF protection -->
+            <h1>My Todo-list</h1>
+
+            <!-- Logout -->
+
+            <form action="/logout" method="POST">
+
+                <input
+                    type="hidden"
+                    name="_csrf"
+                    value="<%= csrfToken %>"
+                />
+
+                <button
+                    type="submit"
+                    class="logout-button"
+                >
+                    Logout
+                </button>
+
+            </form>
+
+        </div>
+
+        <!-- Flash Messages -->
+
+        <% if (typeof messages !== "undefined" && messages.length > 0) { %>
+
+            <% messages.forEach(function(message) { %>
+
+                <div class="flash-message">
+                    <%= message %>
+                </div>
+
+            <% }); %>
+
+        <% } %>
+
+        <!-- Add Todo -->
+
+        <form
+            action="/todos"
+            method="POST"
+            class="todo-form"
+            id="todoForm"
+        >
+
             <input
                 type="hidden"
                 name="_csrf"
@@ -183,115 +264,197 @@
                 required
             />
 
-            <button type="submit">Add</button>
+            <button type="submit">
+                Add
+            </button>
+
         </form>
 
+        <!-- Overdue -->
+
         <section class="category">
+
             <h2>Overdue</h2>
 
             <%- include("todos", { todos: overdue }) %>
+
         </section>
 
+        <!-- Due Today -->
+
         <section class="category">
+
             <h2>Due Today</h2>
 
             <%- include("todos", { todos: dueToday }) %>
+
         </section>
 
+        <!-- Due Later -->
+
         <section class="category">
+
             <h2>Due Later</h2>
 
             <%- include("todos", { todos: dueLater }) %>
+
         </section>
 
+        <!-- Completed -->
+
         <section class="category">
+
             <h2>Completed Items</h2>
 
             <%- include("todos", {
                 todos: completed,
                 emptyMessage: "No completed todos in this category."
             }) %>
+
         </section>
 
     </div>
 
     <script>
-        // Get CSRF token from the hidden form field
+
+        // =========================
+        // CSRF TOKEN
+        // =========================
+
         function getCsrfToken() {
+
             return document.querySelector(
                 'input[name="_csrf"]'
             ).value;
+
         }
 
-        // Client-side validation for adding a Todo
+        // =========================
+        // CLIENT VALIDATION
+        // =========================
+
         document
             .getElementById("todoForm")
-            .addEventListener("submit", function (event) {
+            .addEventListener(
+                "submit",
+                function (event) {
 
-                const title = document
-                    .getElementById("todoTitle")
-                    .value
-                    .trim();
+                    const title =
+                        document
+                            .getElementById(
+                                "todoTitle"
+                            )
+                            .value
+                            .trim();
 
-                const dueDate = document
-                    .getElementById("todoDueDate")
-                    .value;
+                    const dueDate =
+                        document
+                            .getElementById(
+                                "todoDueDate"
+                            )
+                            .value;
 
-                if (!title || !dueDate) {
-                    event.preventDefault();
+                    if (
+                        !title ||
+                        !dueDate
+                    ) {
 
-                    alert("Please enter both a Todo title and due date.");
-                }
-            });
+                        event.preventDefault();
 
-        // Mark Todo complete or incomplete
-        async function setCompletionStatus(id, completed) {
-            try {
-                const response = await fetch(`/todos/${id}`, {
-                    method: "PUT",
-
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-Token": getCsrfToken()
-                    },
-
-                    body: JSON.stringify({
-                        completed: completed
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error("Failed to update Todo");
-                }
-
-                window.location.reload();
-
-            } catch (error) {
-                alert(error.message);
-            }
-        }
-
-        // Delete Todo
-        async function deleteTodo(id) {
-            try {
-                const response = await fetch(`/todos/${id}`, {
-                    method: "DELETE",
-
-                    headers: {
-                        "X-CSRF-Token": getCsrfToken()
+                        alert(
+                            "Please enter both a Todo title and due date."
+                        );
                     }
-                });
+                }
+            );
+
+        // =========================
+        // COMPLETE / INCOMPLETE
+        // =========================
+
+        async function setCompletionStatus(
+            id,
+            completed
+        ) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/todos/${id}`,
+                        {
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+
+                                "X-CSRF-Token":
+                                    getCsrfToken()
+                            },
+
+                            body: JSON.stringify({
+                                completed:
+                                    completed
+                            })
+                        }
+                    );
 
                 if (!response.ok) {
-                    throw new Error("Failed to delete Todo");
+                    throw new Error(
+                        "Failed to update Todo"
+                    );
                 }
 
                 window.location.reload();
 
             } catch (error) {
-                alert(error.message);
+
+                alert(
+                    error.message
+                );
+
             }
         }
+
+        // =========================
+        // DELETE TODO
+        // =========================
+
+        async function deleteTodo(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/todos/${id}`,
+                        {
+                            method: "DELETE",
+
+                            headers: {
+                                "X-CSRF-Token":
+                                    getCsrfToken()
+                            }
+                        }
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Failed to delete Todo"
+                    );
+                }
+
+                window.location.reload();
+
+            } catch (error) {
+
+                alert(
+                    error.message
+                );
+
+            }
+        }
+
     </script>
 
 </body>

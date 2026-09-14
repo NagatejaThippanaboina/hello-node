@@ -1,139 +1,183 @@
 const request = require("supertest");
+const bcrypt = require("bcrypt");
 const app = require("../index");
 const db = require("../models");
 
 describe("Todo web endpoints", () => {
-    let todo;
+  let user;
+  let todo;
 
-    beforeEach(async () => {
-        todo = await db.Todo.create({
-            title: "Test Todo",
-            dueDate: "2026-09-20",
-            completed: false,
-        });
+  beforeEach(async () => {
+    const hashedPassword = await bcrypt.hash("password123", 10);
+
+    user = await db.User.create({
+      firstName: "Test User",
+      email: `test${Date.now()}@example.com`,
+      password: hashedPassword,
     });
 
-    afterEach(async () => {
-        await db.Todo.destroy({
-            where: {},
-        });
+    todo = await db.Todo.create({
+      title: "Test Todo",
+      dueDate: "2026-09-20",
+      completed: false,
+      userId: user.id,
     });
+  });
 
-    afterAll(async () => {
-        await db.sequelize.close();
-    });
+  afterEach(async () => {
+    if (user) {
+      await db.Todo.destroy({
+        where: {
+          userId: user.id,
+        },
+      });
 
-    async function getCsrfToken(agent) {
-        const response = await agent.get("/todos");
-
-        expect(response.statusCode).toBe(200);
-
-        const match = response.text.match(
-            /name="_csrf"\s+value="([^"]+)"/,
-        );
-
-        expect(match).not.toBeNull();
-
-        return match[1];
+      await db.User.destroy({
+        where: {
+          id: user.id,
+        },
+      });
     }
+  });
 
-    // CREATE TODO
-    test("POST /todos creates a new Todo", async () => {
-        const agent = request.agent(app);
-        const csrfToken = await getCsrfToken(agent);
+  async function login(agent) {
+    const loginPage = await agent.get("/login");
 
-        const response = await agent
-            .post("/todos")
-            .set("X-CSRF-Token", csrfToken)
-            .send({
-                title: "New Todo",
-                dueDate: "2026-09-25",
-            });
+    const match = loginPage.text.match(/name="_csrf"\s+value="([^"]+)"/);
 
-        expect(response.statusCode).toBe(302);
-        expect(response.headers.location).toBe("/todos");
+    expect(match).not.toBeNull();
 
-        const createdTodo = await db.Todo.findOne({
-            where: {
-                title: "New Todo",
-            },
-        });
+    const csrfToken = match[1];
 
-        expect(createdTodo).not.toBeNull();
-        expect(createdTodo.dueDate).toBe("2026-09-25");
-        expect(createdTodo.completed).toBe(false);
+    const response = await agent
+      .post("/login")
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        email: user.email,
+        password: "password123",
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe("/todos");
+  }
+
+  async function getCsrfToken(agent) {
+    const response = await agent.get("/todos");
+
+    expect(response.statusCode).toBe(200);
+
+    const match = response.text.match(/name="_csrf"\s+value="([^"]+)"/);
+
+    expect(match).not.toBeNull();
+
+    return match[1];
+  }
+
+  test("POST /todos creates a new Todo", async () => {
+    const agent = request.agent(app);
+
+    await login(agent);
+
+    const csrfToken = await getCsrfToken(agent);
+
+    const response = await agent
+      .post("/todos")
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        title: "New Todo",
+        dueDate: "2026-09-25",
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe("/todos");
+
+    const createdTodo = await db.Todo.findOne({
+      where: {
+        title: "New Todo",
+        userId: user.id,
+      },
     });
 
-    // MARK TODO COMPLETE
-    test("PUT /todos/:id marks a Todo complete", async () => {
-        const agent = request.agent(app);
-        const csrfToken = await getCsrfToken(agent);
+    expect(createdTodo).not.toBeNull();
+    expect(createdTodo.dueDate).toBe("2026-09-25");
+    expect(createdTodo.completed).toBe(false);
+  });
 
-        const response = await agent
-            .put(`/todos/${todo.id}`)
-            .set("X-CSRF-Token", csrfToken)
-            .send({
-                completed: true,
-            });
+  test("PUT /todos/:id marks a Todo complete", async () => {
+    const agent = request.agent(app);
 
-        expect(response.statusCode).toBe(200);
-        expect(response.body.completed).toBe(true);
+    await login(agent);
 
-        const updatedTodo = await db.Todo.findByPk(todo.id);
+    const csrfToken = await getCsrfToken(agent);
 
-        expect(updatedTodo.completed).toBe(true);
+    const response = await agent
+      .put(`/todos/${todo.id}`)
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        completed: true,
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.completed).toBe(true);
+
+    const updatedTodo = await db.Todo.findByPk(todo.id);
+
+    expect(updatedTodo.completed).toBe(true);
+  });
+
+  test("PUT /todos/:id marks a Todo incomplete", async () => {
+    await todo.setCompletionStatus(true);
+
+    const agent = request.agent(app);
+
+    await login(agent);
+
+    const csrfToken = await getCsrfToken(agent);
+
+    const response = await agent
+      .put(`/todos/${todo.id}`)
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        completed: false,
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.completed).toBe(false);
+
+    const updatedTodo = await db.Todo.findByPk(todo.id);
+
+    expect(updatedTodo.completed).toBe(false);
+  });
+
+  test("DELETE /todos/:id deletes a Todo", async () => {
+    const agent = request.agent(app);
+
+    await login(agent);
+
+    const csrfToken = await getCsrfToken(agent);
+
+    const response = await agent
+      .delete(`/todos/${todo.id}`)
+      .set("X-CSRF-Token", csrfToken);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe(true);
+
+    const deletedTodo = await db.Todo.findByPk(todo.id);
+
+    expect(deletedTodo).toBeNull();
+  });
+
+  test("POST /todos rejects requests without CSRF token", async () => {
+    const agent = request.agent(app);
+
+    await login(agent);
+
+    const response = await agent.post("/todos").send({
+      title: "CSRF Attack",
+      dueDate: "2026-09-25",
     });
 
-    // MARK TODO INCOMPLETE
-    test("PUT /todos/:id marks a Todo incomplete", async () => {
-        await todo.setCompletionStatus(true);
-
-        const agent = request.agent(app);
-        const csrfToken = await getCsrfToken(agent);
-
-        const response = await agent
-            .put(`/todos/${todo.id}`)
-            .set("X-CSRF-Token", csrfToken)
-            .send({
-                completed: false,
-            });
-
-        expect(response.statusCode).toBe(200);
-        expect(response.body.completed).toBe(false);
-
-        const updatedTodo = await db.Todo.findByPk(todo.id);
-
-        expect(updatedTodo.completed).toBe(false);
-    });
-
-    // DELETE TODO
-    test("DELETE /todos/:id deletes a Todo", async () => {
-        const agent = request.agent(app);
-        const csrfToken = await getCsrfToken(agent);
-
-        const response = await agent
-            .delete(`/todos/${todo.id}`)
-            .set("X-CSRF-Token", csrfToken);
-
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toBe(true);
-
-        const deletedTodo = await db.Todo.findByPk(todo.id);
-
-        expect(deletedTodo).toBeNull();
-    });
-
-    // CSRF PROTECTION
-    test("POST /todos rejects requests without CSRF token", async () => {
-        const agent = request.agent(app);
-
-        const response = await agent
-            .post("/todos")
-            .send({
-                title: "CSRF Attack",
-                dueDate: "2026-09-25",
-            });
-
-        expect(response.statusCode).toBe(403);
-    });
+    expect(response.statusCode).toBe(403);
+  });
 });
