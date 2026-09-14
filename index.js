@@ -1,48 +1,126 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+const todoList = () => {
+  const all = [];
 
-const args = process.argv;
+  const add = (todoItem) => {
+    all.push(todoItem);
+  };
 
-let port = 3000;
+  const markAsComplete = (index) => {
+    all[index].completed = true;
+  };
 
-const portIndex = args.indexOf("port");
+  const overdue = () => {
+    const today = new Date().toISOString().split("T")[0];
 
-if (portIndex !== -1 && args[portIndex + 1]) {
-  port = Number(args[portIndex + 1]);
-}
+    return all.filter((item) => item.dueDate < today);
+  };
 
-const server = http.createServer((req, res) => {
-  let fileName;
+  const dueToday = () => {
+    const today = new Date().toISOString().split("T")[0];
 
-  if (req.url === "/") {
-    fileName = "home.html";
-  } else if (req.url === "/home") {
-    fileName = "home.html";
-  } else if (req.url === "/project") {
-    fileName = "project.html";
-  } else if (req.url === "/registration") {
-    fileName = "registration.html";
-  } else {
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    res.end("404 - Page Not Found");
-    return;
-  }
+    return all.filter((item) => item.dueDate === today);
+  };
 
-  const filePath = path.join(__dirname, fileName);
+  const dueLater = () => {
+    const today = new Date().toISOString().split("T")[0];
 
-  fs.readFile(filePath, (error, data) => {
-    if (error) {
-      res.writeHead(500, { "Content-Type": "text/plain" });
-      res.end("500 - Internal Server Error");
-      return;
-    }
+    return all.filter((item) => item.dueDate > today);
+  };
 
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.end(data);
-  });
+  const toDisplayablelist = (list) => {
+    return list
+      .map((item) => {
+        const checkbox = item.completed ? "[x]" : "[ ]";
+
+        if (item.dueDate === new Date().toISOString().split("T")[0]) {
+          return `${checkbox} ${item.title}`;
+        }
+
+        return `${checkbox} ${item.title} ${item.dueDate}`;
+      })
+      .join("\n");
+  };
+
+  return {
+    all,
+    add,
+    markAsComplete,
+    overdue,
+    dueToday,
+    dueLater,
+    toDisplayablelist,
+  };
+};
+
+// DO NOT CHANGE ANYTHING BELOW THIS LINE.
+
+const todos = todoList();
+
+const formattedDate = (d) => {
+  return d.toISOString().split("T")[0];
+};
+
+const dateToday = new Date();
+
+const today = formattedDate(dateToday);
+
+const yesterday = formattedDate(
+  new Date(new Date().setDate(dateToday.getDate() - 1)),
+);
+
+const tomorrow = formattedDate(
+  new Date(new Date().setDate(dateToday.getDate() + 1)),
+);
+
+todos.add({
+  title: "Submit assignment",
+  dueDate: yesterday,
+  completed: false,
 });
 
-server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+todos.add({
+  title: "Pay rent",
+  dueDate: today,
+  completed: true,
 });
+
+todos.add({
+  title: "Service Vehicle",
+  dueDate: today,
+  completed: false,
+});
+
+todos.add({
+  title: "Pay electric bill",
+  dueDate: tomorrow,
+  completed: false,
+});
+
+console.log("My Todo-list\n\n");
+
+console.log("Overdue");
+
+const overdues = todos.overdue();
+const formattedOverdues = todos.toDisplayablelist(overdues);
+
+console.log(formattedOverdues);
+
+console.log("\n\n");
+
+console.log("Due Today");
+
+const itemsDueToday = todos.dueToday();
+const formattedItemsDueToday = todos.toDisplayablelist(itemsDueToday);
+
+console.log(formattedItemsDueToday);
+
+console.log("\n\n");
+
+console.log("Due Later");
+
+const itemsDueLater = todos.dueLater();
+const formattedItemsDueLater = todos.toDisplayablelist(itemsDueLater);
+
+console.log(formattedItemsDueLater);
+
+console.log("\n\n");
