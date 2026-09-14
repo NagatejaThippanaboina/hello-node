@@ -1,17 +1,29 @@
 <ul class="todo-list">
-    <% if (todos.length===0) { %>
+    <% if (todos.length === 0) { %>
         <li class="empty">No todos in this category.</li>
-        <% } else { %>
-            <% todos.forEach((todo)=> { %>
-                <li class="todo-item">
+    <% } else { %>
+        <% todos.forEach((todo) => { %>
+            <li class="todo-item">
+                <div class="todo-left">
+                    <input
+                        type="checkbox"
+                        class="todo-checkbox"
+                    />
+
                     <span class="todo-title">
                         <%= todo.title %>
                     </span>
+                </div>
 
-                    <span class="todo-date">
-                        <%= todo.dueDate %>
-                    </span>
-                </li>
-                <% }); %>
-                    <% } %>
+                <button
+                    type="button"
+                    class="delete-button"
+                    onclick="deleteTodo(<%= todo.id %>)"
+                    aria-label="Delete todo"
+                >
+                    🗑
+                </button>
+            </li>
+        <% }); %>
+    <% } %>
 </ul>

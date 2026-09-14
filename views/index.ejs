@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Todo Manager</title>
+    <title>My Todo-list</title>
 
     <style>
         * {
@@ -23,64 +22,66 @@
                 Geneva,
                 Verdana,
                 sans-serif;
-            background: #f5f7fb;
-            color: #1f2937;
-            padding: 40px 20px;
+            background: #ffffff;
+            color: #222222;
+            padding: 50px 30px;
         }
 
         .container {
+            width: 100%;
             max-width: 900px;
             margin: 0 auto;
         }
 
-        .header {
-            background: #ffffff;
-            padding: 32px;
-            border-radius: 20px;
-            margin-bottom: 28px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 35px;
         }
 
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
+        .todo-form {
+            display: grid;
+            grid-template-columns: 1fr 280px auto;
+            gap: 14px;
+            margin-bottom: 38px;
         }
 
-        .header p {
-            color: #6b7280;
-            font-size: 15px;
+        .todo-form input {
+            height: 58px;
+            padding: 0 16px;
+            border: 1px solid #cccccc;
+            border-radius: 7px;
+            font-size: 18px;
+            outline: none;
+        }
+
+        .todo-form input:focus {
+            border-color: #3749a6;
+        }
+
+        .todo-form button {
+            height: 58px;
+            padding: 0 30px;
+            border: none;
+            border-radius: 6px;
+            background: #168548;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .todo-form button:hover {
+            background: #126e3b;
         }
 
         .category {
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
         }
 
-        .category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
-
-        .category-header h2 {
-            font-size: 21px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-
-        .count {
-            min-width: 32px;
-            text-align: center;
-            background: #eef2ff;
-            color: #4f46e5;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
+        .category h2 {
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 16px;
         }
 
         .todo-list {
@@ -89,106 +90,129 @@
 
         .todo-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 16px 18px;
-            margin-bottom: 10px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            background: #fafafa;
-            transition:
-                transform 0.2s ease,
-                box-shadow 0.2s ease;
+            justify-content: space-between;
+            min-height: 52px;
+            padding: 5px 10px;
         }
 
-        .todo-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+        .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
-        .todo-item:last-child {
-            margin-bottom: 0;
+        .todo-checkbox {
+            width: 27px;
+            height: 27px;
+            cursor: pointer;
         }
 
         .todo-title {
-            font-weight: 500;
+            font-size: 21px;
         }
 
-        .todo-date {
-            color: #6b7280;
-            font-size: 13px;
+        .delete-button {
+            border: none;
+            background: transparent;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.65;
+        }
+
+        .delete-button:hover {
+            opacity: 1;
         }
 
         .empty {
-            color: #9ca3af;
-            font-size: 14px;
-            padding: 10px 0;
+            color: #888888;
+            font-size: 17px;
+            padding: 8px 0;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
             body {
-                padding: 20px 12px;
+                padding: 30px 18px;
             }
 
-            .header {
-                padding: 24px;
+            h1 {
+                font-size: 34px;
             }
 
-            .category {
-                padding: 18px;
+            .todo-form {
+                grid-template-columns: 1fr;
             }
 
-            .todo-item {
-                align-items: flex-start;
-                gap: 10px;
-                flex-direction: column;
+            .todo-form button {
+                width: 100%;
+            }
+
+            .todo-title {
+                font-size: 18px;
             }
         }
     </style>
-
 </head>
 
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Todo Manager</h1>
-            <p>Stay organized and keep track of your tasks.</p>
-        </div>
+
+        <h1>My Todo-list</h1>
+
+        <form action="/todos" method="POST" class="todo-form">
+            <input
+                type="text"
+                name="title"
+                placeholder="What's next?"
+                required
+            />
+
+            <input
+                type="date"
+                name="dueDate"
+                required
+            />
+
+            <button type="submit">Add</button>
+        </form>
 
         <section class="category">
-            <div class="category-header">
-                <h2>Overdue</h2>
-                <span class="count">
-                    <%= overdue.length %>
-                </span>
-            </div>
+            <h2>Overdue</h2>
 
             <%- include("todos", { todos: overdue }) %>
         </section>
 
         <section class="category">
-            <div class="category-header">
-                <h2>Due Today</h2>
-                <span class="count">
-                    <%= dueToday.length %>
-                </span>
-            </div>
+            <h2>Due Today</h2>
 
             <%- include("todos", { todos: dueToday }) %>
         </section>
 
         <section class="category">
-            <div class="category-header">
-                <h2>Due Later</h2>
-                <span class="count">
-                    <%= dueLater.length %>
-                </span>
-            </div>
+            <h2>Due Later</h2>
 
             <%- include("todos", { todos: dueLater }) %>
         </section>
+
     </div>
 
+    <script>
+        async function deleteTodo(id) {
+            try {
+                const response = await fetch(`/todos/${id}`, {
+                    method: "DELETE",
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to delete todo");
+                }
+
+                window.location.reload();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+    </script>
 </body>
 
 </html>

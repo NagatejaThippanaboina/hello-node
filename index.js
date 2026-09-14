@@ -4,6 +4,7 @@ const db = require("./models");
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
@@ -48,13 +49,13 @@ app.get("/todos", async (req, res) => {
 
 app.post("/todos", async (req, res) => {
   try {
-    const todo = await db.Todo.create({
+    await db.Todo.create({
       title: req.body.title,
       dueDate: req.body.dueDate,
       completed: false,
     });
 
-    res.json(todo);
+    res.redirect("/todos");
   } catch (error) {
     res.status(500).json({
       error: error.message,
