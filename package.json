@@ -29,9 +29,11 @@
     "supertest": "^7.2.2"
   },
   "dependencies": {
+    "csrf-sync": "^4.2.1",
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "minimist": "^1.2.8",
     "pg": "^8.23.0",
     "pg-hstore": "^2.3.4",

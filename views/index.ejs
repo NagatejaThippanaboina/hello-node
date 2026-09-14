@@ -159,10 +159,19 @@
 
         <h1>My Todo-list</h1>
 
-        <form action="/todos" method="POST" class="todo-form">
+        <form action="/todos" method="POST" class="todo-form" id="todoForm">
+
+            <!-- CSRF protection -->
+            <input
+                type="hidden"
+                name="_csrf"
+                value="<%= csrfToken %>"
+            />
+
             <input
                 type="text"
                 name="title"
+                id="todoTitle"
                 placeholder="What's next?"
                 required
             />
@@ -170,6 +179,7 @@
             <input
                 type="date"
                 name="dueDate"
+                id="todoDueDate"
                 required
             />
 
@@ -194,25 +204,96 @@
             <%- include("todos", { todos: dueLater }) %>
         </section>
 
+        <section class="category">
+            <h2>Completed Items</h2>
+
+            <%- include("todos", {
+                todos: completed,
+                emptyMessage: "No completed todos in this category."
+            }) %>
+        </section>
+
     </div>
 
     <script>
+        // Get CSRF token from the hidden form field
+        function getCsrfToken() {
+            return document.querySelector(
+                'input[name="_csrf"]'
+            ).value;
+        }
+
+        // Client-side validation for adding a Todo
+        document
+            .getElementById("todoForm")
+            .addEventListener("submit", function (event) {
+
+                const title = document
+                    .getElementById("todoTitle")
+                    .value
+                    .trim();
+
+                const dueDate = document
+                    .getElementById("todoDueDate")
+                    .value;
+
+                if (!title || !dueDate) {
+                    event.preventDefault();
+
+                    alert("Please enter both a Todo title and due date.");
+                }
+            });
+
+        // Mark Todo complete or incomplete
+        async function setCompletionStatus(id, completed) {
+            try {
+                const response = await fetch(`/todos/${id}`, {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": getCsrfToken()
+                    },
+
+                    body: JSON.stringify({
+                        completed: completed
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to update Todo");
+                }
+
+                window.location.reload();
+
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // Delete Todo
         async function deleteTodo(id) {
             try {
                 const response = await fetch(`/todos/${id}`, {
                     method: "DELETE",
+
+                    headers: {
+                        "X-CSRF-Token": getCsrfToken()
+                    }
                 });
 
                 if (!response.ok) {
-                    throw new Error("Failed to delete todo");
+                    throw new Error("Failed to delete Todo");
                 }
 
                 window.location.reload();
+
             } catch (error) {
                 alert(error.message);
             }
         }
     </script>
+
 </body>
 
 </html>

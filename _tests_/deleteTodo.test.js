@@ -1,27 +1,50 @@
 const request = require("supertest");
+const app = require("../index");
 const db = require("../models");
 
-const app = require("../index");
-
 describe("DELETE /todos/:id", () => {
-  test("should delete a todo", async () => {
-    const todo = await db.Todo.create({
-      title: "Test Todo",
-      dueDate: "2026-09-16",
-      completed: false,
+    let todo;
+
+    beforeEach(async () => {
+        todo = await db.Todo.create({
+            title: "Test Todo",
+            dueDate: "2026-09-20",
+            completed: false,
+        });
     });
 
-    const response = await request(app).delete(`/todos/${todo.id}`);
+    afterEach(async () => {
+        await db.Todo.destroy({
+            where: {},
+        });
+    });
 
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toBe(true);
+    afterAll(async () => {
+        await db.sequelize.close();
+    });
 
-    const deletedTodo = await db.Todo.findByPk(todo.id);
+    test("should delete a todo", async () => {
+        const agent = request.agent(app);
 
-    expect(deletedTodo).toBeNull();
-  });
-});
+        const page = await agent.get("/todos");
 
-afterAll(async () => {
-  await db.sequelize.close();
+        const match = page.text.match(
+            /name="_csrf"\s+value="([^"]+)"/,
+        );
+
+        expect(match).not.toBeNull();
+
+        const csrfToken = match[1];
+
+        const response = await agent
+            .delete(`/todos/${todo.id}`)
+            .set("X-CSRF-Token", csrfToken);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toBe(true);
+
+        const deletedTodo = await db.Todo.findByPk(todo.id);
+
+        expect(deletedTodo).toBeNull();
+    });
 });

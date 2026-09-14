@@ -1,18 +1,31 @@
 <ul class="todo-list">
     <% if (todos.length === 0) { %>
-        <li class="empty">No todos in this category.</li>
+
+        <li class="empty">
+            <%= typeof emptyMessage !== "undefined"
+                ? emptyMessage
+                : "No todos in this category." %>
+        </li>
+
     <% } else { %>
+
         <% todos.forEach((todo) => { %>
+
             <li class="todo-item">
+
                 <div class="todo-left">
+
                     <input
                         type="checkbox"
                         class="todo-checkbox"
+                        <%= todo.completed ? "checked" : "" %>
+                        onchange="setCompletionStatus(<%= todo.id %>, this.checked)"
                     />
 
                     <span class="todo-title">
                         <%= todo.title %>
                     </span>
+
                 </div>
 
                 <button
@@ -23,7 +36,10 @@
                 >
                     🗑
                 </button>
+
             </li>
+
         <% }); %>
+
     <% } %>
 </ul>
