@@ -1,0 +1,17 @@
+<ul class="todo-list">
+    <% if (todos.length===0) { %>
+        <li class="empty">No todos in this category.</li>
+        <% } else { %>
+            <% todos.forEach((todo)=> { %>
+                <li class="todo-item">
+                    <span class="todo-title">
+                        <%= todo.title %>
+                    </span>
+
+                    <span class="todo-date">
+                        <%= todo.dueDate %>
+                    </span>
+                </li>
+                <% }); %>
+                    <% } %>
+</ul>

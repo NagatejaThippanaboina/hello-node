@@ -5,6 +5,8 @@ const app = express();
 
 app.use(express.json());
 
+app.set("view engine", "ejs");
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
@@ -13,11 +15,34 @@ app.get("/todos", async (req, res) => {
   try {
     const todos = await db.Todo.findAll();
 
-    res.json(todos);
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
+    const today = new Date();
+
+    const todayString =
+      today.getFullYear() +
+      "-" +
+      String(today.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(today.getDate()).padStart(2, "0");
+
+    const overdue = todos.filter(
+      (todo) => todo.dueDate < todayString && !todo.completed,
+    );
+
+    const dueToday = todos.filter(
+      (todo) => todo.dueDate === todayString && !todo.completed,
+    );
+
+    const dueLater = todos.filter(
+      (todo) => todo.dueDate > todayString && !todo.completed,
+    );
+
+    res.render("index", {
+      overdue,
+      dueToday,
+      dueLater,
     });
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 });
 

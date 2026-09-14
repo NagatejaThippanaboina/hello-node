@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Todo Manager</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family:
+                "Segoe UI",
+                Tahoma,
+                Geneva,
+                Verdana,
+                sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+        .category {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .category-header h2 {
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .count {
+            min-width: 32px;
+            text-align: center;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fafafa;
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+        }
+
+        .todo-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .todo-title {
+            font-weight: 500;
+        }
+
+        .todo-date {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .empty {
+            color: #9ca3af;
+            font-size: 14px;
+            padding: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            .header {
+                padding: 24px;
+            }
+
+            .category {
+                padding: 18px;
+            }
+
+            .todo-item {
+                align-items: flex-start;
+                gap: 10px;
+                flex-direction: column;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Todo Manager</h1>
+            <p>Stay organized and keep track of your tasks.</p>
+        </div>
+
+        <section class="category">
+            <div class="category-header">
+                <h2>Overdue</h2>
+                <span class="count">
+                    <%= overdue.length %>
+                </span>
+            </div>
+
+            <%- include("todos", { todos: overdue }) %>
+        </section>
+
+        <section class="category">
+            <div class="category-header">
+                <h2>Due Today</h2>
+                <span class="count">
+                    <%= dueToday.length %>
+                </span>
+            </div>
+
+            <%- include("todos", { todos: dueToday }) %>
+        </section>
+
+        <section class="category">
+            <div class="category-header">
+                <h2>Due Later</h2>
+                <span class="count">
+                    <%= dueLater.length %>
+                </span>
+            </div>
+
+            <%- include("todos", { todos: dueLater }) %>
+        </section>
+    </div>
+
+</body>
+
+</html>
