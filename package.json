@@ -25,10 +25,14 @@
     "husky": "^9.1.7",
     "jest": "^30.5.1",
     "prettier": "^3.9.6",
-    "sequelize-cli": "^6.6.5"
+    "sequelize-cli": "^6.6.5",
+    "supertest": "^7.2.2"
   },
   "dependencies": {
+    "express": "^5.2.1",
     "minimist": "^1.2.8",
+    "pg": "^8.23.0",
+    "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8",
     "sqlite3": "^6.0.1"
   }

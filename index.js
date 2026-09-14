@@ -1,66 +1,64 @@
-const { todoList } = require("./todo");
+const express = require("express");
+const db = require("./models");
 
-const todos = todoList();
+const app = express();
 
-const formattedDate = (d) => {
-  return d.toISOString().split("T")[0];
-};
+app.use(express.json());
 
-const dateToday = new Date();
-
-const today = formattedDate(dateToday);
-
-const yesterday = formattedDate(
-  new Date(new Date().setDate(dateToday.getDate() - 1)),
-);
-
-const tomorrow = formattedDate(
-  new Date(new Date().setDate(dateToday.getDate() + 1)),
-);
-
-todos.add({
-  title: "Submit assignment",
-  dueDate: yesterday,
-  completed: false,
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
-todos.add({
-  title: "Pay rent",
-  dueDate: today,
-  completed: true,
+app.get("/todos", async (req, res) => {
+  try {
+    const todos = await db.Todo.findAll();
+
+    res.json(todos);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 });
 
-todos.add({
-  title: "Service Vehicle",
-  dueDate: today,
-  completed: false,
+app.post("/todos", async (req, res) => {
+  try {
+    const todo = await db.Todo.create({
+      title: req.body.title,
+      dueDate: req.body.dueDate,
+      completed: false,
+    });
+
+    res.json(todo);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 });
 
-todos.add({
-  title: "Pay electric bill",
-  dueDate: tomorrow,
-  completed: false,
+app.delete("/todos/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const deleted = await db.Todo.destroy({
+      where: {
+        id,
+      },
+    });
+
+    res.json(deleted > 0);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 });
 
-console.log("My Todo-list\n\n");
+if (require.main === module) {
+  app.listen(3000, () => {
+    console.log("Server running on port 3000");
+  });
+}
 
-console.log("Overdue");
-
-const overdues = todos.overdue();
-console.log(todos.toDisplayablelist(overdues));
-
-console.log("\n\n");
-
-console.log("Due Today");
-
-const itemsDueToday = todos.dueToday();
-console.log(todos.toDisplayablelist(itemsDueToday));
-
-console.log("\n\n");
-
-console.log("Due Later");
-
-const itemsDueLater = todos.dueLater();
-console.log(todos.toDisplayablelist(itemsDueLater));
-
-console.log("\n\n");
+module.exports = app;
