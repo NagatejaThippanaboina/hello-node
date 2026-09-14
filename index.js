@@ -1,58 +1,4 @@
-const todoList = () => {
-  const all = [];
-
-  const add = (todoItem) => {
-    all.push(todoItem);
-  };
-
-  const markAsComplete = (index) => {
-    all[index].completed = true;
-  };
-
-  const overdue = () => {
-    const today = new Date().toISOString().split("T")[0];
-
-    return all.filter((item) => item.dueDate < today);
-  };
-
-  const dueToday = () => {
-    const today = new Date().toISOString().split("T")[0];
-
-    return all.filter((item) => item.dueDate === today);
-  };
-
-  const dueLater = () => {
-    const today = new Date().toISOString().split("T")[0];
-
-    return all.filter((item) => item.dueDate > today);
-  };
-
-  const toDisplayablelist = (list) => {
-    return list
-      .map((item) => {
-        const checkbox = item.completed ? "[x]" : "[ ]";
-
-        if (item.dueDate === new Date().toISOString().split("T")[0]) {
-          return `${checkbox} ${item.title}`;
-        }
-
-        return `${checkbox} ${item.title} ${item.dueDate}`;
-      })
-      .join("\n");
-  };
-
-  return {
-    all,
-    add,
-    markAsComplete,
-    overdue,
-    dueToday,
-    dueLater,
-    toDisplayablelist,
-  };
-};
-
-// DO NOT CHANGE ANYTHING BELOW THIS LINE.
+const { todoList } = require("./todo");
 
 const todos = todoList();
 
@@ -101,26 +47,20 @@ console.log("My Todo-list\n\n");
 console.log("Overdue");
 
 const overdues = todos.overdue();
-const formattedOverdues = todos.toDisplayablelist(overdues);
-
-console.log(formattedOverdues);
+console.log(todos.toDisplayablelist(overdues));
 
 console.log("\n\n");
 
 console.log("Due Today");
 
 const itemsDueToday = todos.dueToday();
-const formattedItemsDueToday = todos.toDisplayablelist(itemsDueToday);
-
-console.log(formattedItemsDueToday);
+console.log(todos.toDisplayablelist(itemsDueToday));
 
 console.log("\n\n");
 
 console.log("Due Later");
 
 const itemsDueLater = todos.dueLater();
-const formattedItemsDueLater = todos.toDisplayablelist(itemsDueLater);
-
-console.log(formattedItemsDueLater);
+console.log(todos.toDisplayablelist(itemsDueLater));
 
 console.log("\n\n");
